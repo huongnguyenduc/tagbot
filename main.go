@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -49,32 +50,47 @@ func removeAtAll(text string) string {
 }
 
 func initDB() {
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		log.Fatal("Missing DATABASE_URL environment variable")
+	}
+
 	var err error
-	db, err = sql.Open("sqlite3", "./members.db")
+	db, err = sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to open DB:", err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("Failed to ping DB:", err)
 	}
 
 	createTable := `
 	CREATE TABLE IF NOT EXISTS members (
-		chat_id INTEGER,
-		user_id INTEGER,
+		chat_id BIGINT NOT NULL,
+		user_id BIGINT NOT NULL,
 		first_name TEXT,
 		last_name TEXT,
 		username TEXT,
 		PRIMARY KEY (chat_id, user_id)
-	);`
+	);
+	`
 
 	_, err = db.Exec(createTable)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to create table:", err)
 	}
 }
 
 func saveUser(chatID int64, user *tgbotapi.User) {
 	stmt, err := db.Prepare(`
-	INSERT OR REPLACE INTO members (chat_id, user_id, first_name, last_name, username)
-	VALUES (?, ?, ?, ?, ?);
+	INSERT INTO members (chat_id, user_id, first_name, last_name, username)
+	VALUES ($1, $2, $3, $4, $5)
+	ON CONFLICT (chat_id, user_id) DO UPDATE
+	SET first_name = EXCLUDED.first_name,
+		last_name = EXCLUDED.last_name,
+		username = EXCLUDED.username;
 	`)
 	if err != nil {
 		log.Println("Prepare failed:", err)
@@ -89,14 +105,14 @@ func saveUser(chatID int64, user *tgbotapi.User) {
 }
 
 func deleteUser(chatID int64, userID int64) {
-	_, err := db.Exec("DELETE FROM members WHERE chat_id = ? AND user_id = ?", chatID, userID)
+	_, err := db.Exec("DELETE FROM members WHERE chat_id = $1 AND user_id = $2", chatID, userID)
 	if err != nil {
 		log.Println("Delete failed:", err)
 	}
 }
 
 func getMentions(chatID int64) string {
-	rows, err := db.Query(`SELECT user_id, first_name, last_name, username FROM members WHERE chat_id = ?`, chatID)
+	rows, err := db.Query(`SELECT user_id, first_name, last_name, username FROM members WHERE chat_id = $1`, chatID)
 	if err != nil {
 		log.Println("Query failed:", err)
 		return ""
@@ -105,7 +121,7 @@ func getMentions(chatID int64) string {
 
 	var mentions []string
 	for rows.Next() {
-		var userID int
+		var userID int64
 		var firstName, lastName, username string
 		err = rows.Scan(&userID, &firstName, &lastName, &username)
 		if err != nil {
@@ -139,20 +155,45 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Delete webhook if it exists
-	if _, err := bot.Request(tgbotapi.DeleteWebhookConfig{}); err != nil {
-		log.Fatalf("Failed to delete webhook: %v", err)
-	}
-
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	updates := bot.GetUpdatesChan(u)
+	// Setup webhook
+	webhookURL := os.Getenv("WEBHOOK_URL") // e.g. https://yourdomain.com/telegram-webhook
+	if webhookURL == "" {
+		log.Fatal("Missing WEBHOOK_URL environment variable")
+	}
 
-	for update := range updates {
+	whcfg, err := tgbotapi.NewWebhook(webhookURL)
+	if err != nil {
+		log.Fatal("NewWebhook failed:", err)
+	}
+
+	_, err = bot.Request(whcfg)
+	if err != nil {
+		log.Fatal("Failed to set webhook:", err)
+	}
+
+	// Get webhook info
+	info, err := bot.GetWebhookInfo()
+	if err != nil {
+		log.Fatal("Failed to get webhook info:", err)
+	}
+	if info.URL != webhookURL {
+		log.Fatalf("Webhook URL mismatch. Got: %s", info.URL)
+	}
+
+	log.Printf("Webhook set to %s", webhookURL)
+
+	// Start HTTP server to receive updates from Telegram
+	http.HandleFunc("/telegram-webhook", func(w http.ResponseWriter, r *http.Request) {
+		update, err := bot.HandleUpdate(r)
+		if err != nil {
+			log.Println("Failed to handle update:", err)
+			return
+		}
+
 		if update.Message == nil {
-			continue
+			return
 		}
 
 		msg := update.Message
@@ -169,7 +210,7 @@ func main() {
 		if msg.LeftChatMember != nil {
 			deleteUser(chatID, msg.LeftChatMember.ID)
 			log.Printf("User %d left chat %d and was removed from DB", msg.LeftChatMember.ID, chatID)
-			continue
+			return
 		}
 
 		// Handle @all mentions
@@ -179,7 +220,7 @@ func main() {
 
 			if tags == "" {
 				log.Println("No members found to tag.")
-				continue
+				return
 			}
 
 			fullText := fmt.Sprintf("%s %s", messageText, tags)
@@ -192,5 +233,13 @@ func main() {
 				log.Println("Send error:", err)
 			}
 		}
+	})
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
+
+	log.Printf("Starting server on :%s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

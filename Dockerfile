@@ -1,10 +1,22 @@
-FROM golang:1.23
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
+
+RUN apk add --no-cache git
+
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-RUN go mod tidy
-RUN go build -o app .
+RUN go build -o bot
 
-ENV PORT=8080
-CMD ["/app/app"]
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/bot .
+
+EXPOSE 8080
+
+CMD ["./bot"]
