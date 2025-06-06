@@ -78,6 +78,5 @@ func helpText() string {
 		"*Commands:*\n" +
 		"/help - Show this help message\n" +
 		"/tagall - Mention all members\n\n" +
-		"To vote, use the inline buttons in the poll message.\n" +
-		"@all or /tagall will mention all players in the group."
+		"@all or /tagall will mention all members in the group."
 }
