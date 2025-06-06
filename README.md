@@ -4,34 +4,14 @@ A Telegram bot for managing daily attendance polls for Werewolf game groups.
 
 ## Features
 
-✅ **Manual Poll Trigger** (`/poll` command)
-- Immediately triggers the daily Werewolf poll manually
-- Prevents duplicate polls on the same day
-- Cancels auto-scheduled poll for the current day
-
-✅ **Automatic Scheduling**
-- Daily polls at configurable times
-- Timezone-aware scheduling
-- Automatic reminders
-
 ✅ **User Management**
 - Automatic user registration on messages
 - Member mentions with `@all` or `/tagall`
 - User cleanup on leave/kick
 
-✅ **Voting System**
-- Interactive inline keyboard voting
-- Vote tracking and counting
-- Vote reset for each new poll
-
 ## Commands
 
 - `/help` - Show help message
-- `/poll` - Trigger daily poll manually (cancels today's automatic poll)
-- `/settimezone <timezone>` - Set group timezone (e.g. Asia/Ho_Chi_Minh)
-- `/setpolltime HH:MM` - Set poll time (24h format)
-- `/setremindtime HH:MM` - Set reminder time (24h format)
-- `/votes` - Show current vote counts
 - `/tagall` - Mention all members
 
 ## Project Structure
@@ -44,8 +24,6 @@ The codebase has been refactored into smaller, maintainable modules:
 - **`globals.go`** - Global variables and shared state
 - **`database.go`** - Database operations and schema
 - **`utils.go`** - Utility functions and helpers
-- **`scheduler.go`** - Task scheduling and manual poll tracking
-- **`poll.go`** - Poll creation and voting logic
 - **`handlers.go`** - Command and event handlers
 - **`webhook.go`** - Webhook server and HTTP handling
 
@@ -75,18 +53,6 @@ The codebase has been refactored into smaller, maintainable modules:
 - Help text
 - Group setting updates
 
-#### `scheduler.go`
-- Automatic task scheduling
-- Manual poll tracking
-- Timezone handling
-- Memory cleanup for old poll triggers
-
-#### `poll.go`
-- Manual poll triggering
-- Poll message creation
-- Reminder sending
-- Callback query handling
-
 #### `handlers.go`
 - Command processing
 - @all mention handling
@@ -114,8 +80,6 @@ The codebase has been refactored into smaller, maintainable modules:
 The bot uses PostgreSQL with the following tables:
 
 - `members` - Chat members and their information
-- `group_settings` - Per-group configuration (timezone, poll times)
-- `votes` - Daily vote tracking
 
 ## Building and Running
 
@@ -181,23 +145,6 @@ The bot automatically handles switching between polling and webhook modes:
 
 ## Key Features Implementation
 
-### Manual Poll System
-- Tracks manual polls per chat per day using `chatID:YYYY-MM-DD` keys
-- Prevents duplicate manual polls on the same day
-- Automatically cancels scheduled polls when manual poll is triggered
-- Memory cleanup for old poll triggers (7+ days)
-
-### Timezone Support
-- Per-group timezone configuration
-- All scheduling respects group timezone
-- Fallback to UTC for invalid timezones
-
-### Robust Scheduling
-- Context-based cancellation for clean shutdown
-- Automatic rescheduling when settings change
-- Skip automatic polls if manual poll already triggered
-
 ### Database Integration
 - Automatic schema creation
 - Conflict resolution for user updates
-- Efficient vote counting and retrieval

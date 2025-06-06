@@ -28,11 +28,6 @@ func main() {
 	// Register commands with Telegram client
 	commands := []tgbotapi.BotCommand{
 		{Command: "help", Description: "Show help message"},
-		{Command: "poll", Description: "Trigger daily poll manually"},
-		{Command: "settimezone", Description: "Set group timezone"},
-		{Command: "setpolltime", Description: "Set poll time (HH:MM)"},
-		{Command: "setremindtime", Description: "Set reminder time (HH:MM)"},
-		{Command: "votes", Description: "Show current vote counts"},
 		{Command: "tagall", Description: "Mention all members"},
 	}
 	_, err = bot.Request(tgbotapi.NewSetMyCommands(commands...))

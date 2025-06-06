@@ -56,15 +56,13 @@ func processUpdate(update tgbotapi.Update) {
 		if update.ChatMember != nil {
 			handleChatMemberUpdate(update.ChatMember)
 		}
-	} else if update.CallbackQuery != nil {
-		handleCallbackQuery(update.CallbackQuery)
 	}
 }
 
 // setupWebhook configures the webhook with Telegram
 func setupWebhook(webhookURL string) error {
 	log.Printf("Setting up webhook at: %s", webhookURL)
-	
+
 	webhook, err := tgbotapi.NewWebhook(webhookURL)
 	if err != nil {
 		return fmt.Errorf("failed to create webhook: %w", err)
@@ -82,7 +80,7 @@ func setupWebhook(webhookURL string) error {
 // removeWebhook removes the webhook (useful for switching back to polling)
 func removeWebhook() error {
 	log.Println("Removing webhook...")
-	
+
 	_, err := bot.Request(tgbotapi.DeleteWebhookConfig{})
 	if err != nil {
 		return fmt.Errorf("failed to remove webhook: %w", err)
@@ -111,7 +109,7 @@ func startWebhookServer() {
 
 	// Set up HTTP server
 	http.HandleFunc("/webhook", webhookHandler)
-	
+
 	// Health check endpoint
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -120,7 +118,7 @@ func startWebhookServer() {
 
 	log.Printf("Starting webhook server on port %s", port)
 	log.Printf("Webhook endpoint: /webhook")
-	
+
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal("Failed to start webhook server:", err)
 	}
