@@ -60,11 +60,43 @@ func getMentions(chatID int64) string {
 	return strings.Join(mentions, " ")
 }
 
+func startText() string {
+	return "🌕 *Awooo! I am the Alpha Wolf of @werewolf_u2u_bot!*\n\n" +
+		"As the Alpha of this pack, I'll help gather all the wolves for our nightly hunts\\. Here's how to summon the pack:\n\n" +
+		"*Pack Commands:*\n" +
+		"• /start \\- Hear the Alpha's howl\n" +
+		"• /help \\- Learn the ways of the pack\n" +
+		"• /tagall \\- Summon all wolves to the hunt\n\n" +
+		"*Pack Features:*\n" +
+		"• Type `@all` in any message to call the pack\n" +
+		"• I track all wolves in our territory\n" +
+		"• Wolves who leave are removed from the pack\n\n" +
+		"*Note:* To summon the pack, I need to be an Alpha in the group\\. Grant me the necessary permissions to lead the hunt\\.\n\n" +
+		"*Pack Creator:*\n" +
+		"⚡ I was created by the mighty Alpha @duchuongnguyen ⚡\n\n" +
+		"*Support the Pack:*\n" +
+		"Feel free to howl at my creator @duchuongnguyen for:\n" +
+		"• New features for the pack\n" +
+		"• Updates and improvements\n" +
+		"• Supporting the pack's growth"
+}
+
 func helpText() string {
-	return "🤖 *Werewolf Bot Help*\n\n" +
-		"Use /help to see this message.\n\n" +
-		"*Commands:*\n" +
-		"/help - Show this help message\n" +
-		"/tagall - Mention all members\n\n" +
-		"@all or /tagall will mention all members in the group."
+	return "🌕 *Pack Commands Guide*\n\n" +
+		"*How to Summon the Pack:*\n" +
+		"• Use /tagall to call all wolves to the hunt\n" +
+		"• Type @all in any message to gather the pack\n\n" +
+		"*Alpha's Notes:*\n" +
+		"• I track all wolves in our territory\n" +
+		"• Wolves who leave are removed from the pack\n" +
+		"• I need to be an Alpha to summon the pack\n\n" +
+		"*Need Help?*\n" +
+		"Use /start to hear the Alpha's howl again\\.\n\n" +
+		"*Pack Creator:*\n" +
+		"⚡ I was created by the mighty Alpha @duchuongnguyen ⚡\n\n" +
+		"*Support the Pack:*\n" +
+		"Feel free to howl at my creator @duchuongnguyen for:\n" +
+		"• New features for the pack\n" +
+		"• Updates and improvements\n" +
+		"• Supporting the pack's growth"
 }

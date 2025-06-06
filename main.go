@@ -27,6 +27,7 @@ func main() {
 
 	// Register commands with Telegram client
 	commands := []tgbotapi.BotCommand{
+		{Command: "start", Description: "Show welcome message"},
 		{Command: "help", Description: "Show help message"},
 		{Command: "tagall", Description: "Mention all members"},
 	}

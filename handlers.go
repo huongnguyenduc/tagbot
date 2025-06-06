@@ -12,6 +12,11 @@ func handleCommands(update tgbotapi.Update) {
 	cmd := update.Message.Command()
 
 	switch cmd {
+	case "start":
+		msg := tgbotapi.NewMessage(chatID, startText())
+		msg.ParseMode = "Markdown"
+		bot.Send(msg)
+
 	case "help":
 		msg := tgbotapi.NewMessage(chatID, helpText())
 		msg.ParseMode = "Markdown"
