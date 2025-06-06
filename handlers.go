@@ -32,16 +32,20 @@ func handleCommands(update tgbotapi.Update) {
 }
 
 func handleAtAllMention(update tgbotapi.Update) {
+	// Ignore messages not from users (e.g., from the bot itself)
+	if update.Message == nil || update.Message.From.IsBot {
+		return
+	}
+
 	chatID := update.Message.Chat.ID
 	text := update.Message.Text
 
 	if strings.Contains(strings.ToLower(text), "@all") {
 		mentions := getMentions(chatID)
-		trimmedText := removeAtAll(text)
 		if mentions == "" {
 			mentions = "No members found to mention."
 		}
-		msgText := trimmedText + "\n\n" + mentions
+		msgText := text + "\n" + mentions
 		msg := tgbotapi.NewMessage(chatID, msgText)
 		msg.ParseMode = "MarkdownV2"
 		bot.Send(msg)

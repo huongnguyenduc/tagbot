@@ -31,18 +31,6 @@ func escapeMarkdownV2(text string) string {
 	return replacer.Replace(text)
 }
 
-// Remove @all mention from text to avoid double mention issues
-func removeAtAll(text string) string {
-	words := strings.Fields(text)
-	var filtered []string
-	for _, w := range words {
-		if strings.ToLower(w) != "@all" {
-			filtered = append(filtered, w)
-		}
-	}
-	return strings.Join(filtered, " ")
-}
-
 func getMentions(chatID int64) string {
 	query := `SELECT user_id, first_name, last_name, username FROM members WHERE chat_id = $1`
 	rows, err := db.Query(query, chatID)
