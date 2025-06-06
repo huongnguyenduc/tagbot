@@ -16,29 +16,29 @@ func triggerManualPoll(chatID int64) {
 		log.Println("Failed to get group settings for manual poll, using default timezone:", err)
 		timezone = "Asia/Ho_Chi_Minh"
 	}
-	
+
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
 		log.Printf("Invalid timezone '%s' for chat %d, using default UTC\n", timezone, chatID)
 		loc = time.UTC
 	}
-	
+
 	// Check if manual poll was already triggered today
 	if wasManualPollTriggeredToday(chatID, loc) {
 		msg := tgbotapi.NewMessage(chatID, "⚠️ Manual poll was already triggered today!")
 		bot.Send(msg)
 		return
 	}
-	
+
 	// Mark manual poll as triggered
 	markManualPollTriggered(chatID, loc)
-	
+
 	// Send the poll immediately
 	sendPoll(chatID)
-	
+
 	// Reschedule tasks to skip today's automatic poll
 	scheduleGroupTasks(chatID)
-	
+
 	// Send confirmation
 	msg := tgbotapi.NewMessage(chatID, "✅ Manual poll triggered! Today's automatic poll has been cancelled.")
 	bot.Send(msg)
@@ -53,7 +53,6 @@ func sendPoll(chatID int64) {
 
 	// Inline keyboard buttons
 	pollMsg := tgbotapi.NewMessage(chatID, msgText)
-	pollMsg.ParseMode = "MarkdownV2"
 	pollMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Count me in 🟢", "vote_in"),
