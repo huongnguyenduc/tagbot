@@ -15,6 +15,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y tzdata
+
 COPY --from=builder /app/bot .
 
 EXPOSE 8080
