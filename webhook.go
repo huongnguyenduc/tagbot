@@ -56,6 +56,9 @@ func processUpdate(update tgbotapi.Update) {
 		if update.ChatMember != nil {
 			handleChatMemberUpdate(update.ChatMember)
 		}
+
+		// Handle send message to chat group
+		handleSendMessageToChatGroup(update)
 	}
 }
 

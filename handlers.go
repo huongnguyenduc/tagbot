@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -69,6 +70,28 @@ func handleChatMemberUpdate(chatMember *tgbotapi.ChatMemberUpdated) {
 		err := deleteUser(chatID, userID)
 		if err != nil {
 			log.Printf("Failed to delete user %d from chat %d: %v", userID, chatID, err)
+		}
+	}
+}
+
+func handleSendMessageToChatGroup(update tgbotapi.Update) {
+	text := update.Message.Text
+
+	// Send message to chat group with special message pattern @sendto <chat_id> <message>
+	if strings.HasPrefix(text, "@sendto") {
+		parts := strings.Split(text, " ")
+		if len(parts) >= 3 {
+			chatIDStr := parts[1]
+			// Check if chatID is a valid ChatID from Telegram
+			chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
+			if err != nil {
+				log.Printf("Invalid chatID: %s, error: %v", chatIDStr, err)
+				return
+			}
+			message := strings.Join(parts[2:], " ")
+			msg := tgbotapi.NewMessage(chatID, message)
+			msg.ParseMode = "MarkdownV2"
+			bot.Send(msg)
 		}
 	}
 }
