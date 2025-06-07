@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -75,21 +74,20 @@ func handleChatMemberUpdate(chatMember *tgbotapi.ChatMemberUpdated) {
 }
 
 func handleSendMessageToChatGroup(update tgbotapi.Update) {
-	text := update.Message.Text
-
-	// Send message to chat group with special message pattern @sendto <chat_id> <message>
-	if strings.HasPrefix(text, "@sendto") {
-		parts := strings.Split(text, " ")
-		if len(parts) >= 3 {
-			chatIDStr := parts[1]
-			// Check if chatID is a valid ChatID from Telegram
-			chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
-			if err != nil {
-				log.Printf("Invalid chatID: %s, error: %v", chatIDStr, err)
-				return
-			}
-			message := strings.Join(parts[2:], " ")
+	switch {
+	case update.Message.Text != "":
+		chatID, message := detectSendToMessage(update.Message.Text)
+		if chatID != 0 && message != "" {
 			msg := tgbotapi.NewMessage(chatID, message)
+			msg.ParseMode = "MarkdownV2"
+			bot.Send(msg)
+		}
+	case update.Message.Photo != nil && update.Message.Caption != "":
+		chatID, message := detectSendToMessage(update.Message.Caption)
+		if chatID != 0 && message != "" {
+			photo := update.Message.Photo[len(update.Message.Photo)-1] // get highest resolution
+			msg := tgbotapi.NewPhoto(chatID, tgbotapi.FileID(photo.FileID))
+			msg.Caption = message
 			msg.ParseMode = "MarkdownV2"
 			bot.Send(msg)
 		}

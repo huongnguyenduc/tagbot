@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -99,4 +100,22 @@ func helpText() string {
 		"• New features for the pack\n" +
 		"• Updates and improvements\n" +
 		"• Supporting the pack's growth"
+}
+
+// Detect @sendto <chat_id> <message> pattern & return the chat_id and message
+func detectSendToMessage(text string) (int64, string) {
+	if strings.HasPrefix(text, "@sendto") {
+		parts := strings.Split(text, " ")
+		if len(parts) >= 3 {
+			chatIDStr := parts[1]
+			chatID, err := strconv.ParseInt(chatIDStr, 10, 64)
+			if err != nil {
+				log.Printf("Invalid chatID: %s, error: %v", chatIDStr, err)
+				return 0, ""
+			}
+			message := strings.Join(parts[2:], " ")
+			return chatID, message
+		}
+	}
+	return 0, ""
 }
