@@ -84,11 +84,13 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 		}
 	case update.Message.Photo != nil && update.Message.Caption != "":
 		chatID, message := detectSendToMessage(update.Message.Caption)
-		if chatID != 0 && message != "" {
+		if chatID != 0 {
 			photo := update.Message.Photo[len(update.Message.Photo)-1] // get highest resolution
 			msg := tgbotapi.NewPhoto(chatID, tgbotapi.FileID(photo.FileID))
-			msg.Caption = message
-			msg.ParseMode = "MarkdownV2"
+			if message != "" {
+				msg.Caption = message
+				msg.ParseMode = "MarkdownV2"
+			}
 			bot.Send(msg)
 		}
 	}
