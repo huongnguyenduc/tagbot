@@ -110,8 +110,8 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 				LogError("Failed to send message to chat %d: %v", chatID, err)
 			}
 		}
-	case update.Message.Document != nil:
-		chatID, message := detectSendToMessage(update.Message.Document.FileName)
+	case update.Message.Document != nil && update.Message.Caption != "":
+		chatID, message := detectSendToMessage(update.Message.Caption)
 		if chatID != 0 {
 			msg := tgbotapi.NewDocument(chatID, tgbotapi.FileID(update.Message.Document.FileID))
 			if message != "" {
