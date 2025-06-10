@@ -14,34 +14,34 @@ func handleCommands(update tgbotapi.Update) {
 
 	switch cmd {
 	case "start":
-		msg := tgbotapi.NewMessage(chatID, startText())
-		msg.ParseMode = "Markdown"
+		msg := tgbotapi.NewMessage(chatID, escapeMarkdownV2(startText()))
+		msg.ParseMode = "MarkdownV2"
 		if _, err := bot.Send(msg); err != nil {
 			LogError("Failed to send start message to chat %d: %v", chatID, err)
 		}
 
 	case "help":
-		msg := tgbotapi.NewMessage(chatID, helpText())
-		msg.ParseMode = "Markdown"
+		msg := tgbotapi.NewMessage(chatID, escapeMarkdownV2(helpText()))
+		msg.ParseMode = "MarkdownV2"
 		if _, err := bot.Send(msg); err != nil {
 			LogError("Failed to send help message to chat %d: %v", chatID, err)
 		}
 
-	case "tagall":
+	case "all":
+		// Get the message text from the command
+		message := update.Message.Text
+		if message == "" {
+			message = "No message provided."
+		}
+
 		mentions := getMentions(chatID)
 		if mentions == "" {
 			mentions = "No members found to mention."
 		}
-		msg := tgbotapi.NewMessage(chatID, mentions)
+		msg := tgbotapi.NewMessage(chatID, escapeMarkdownV2(message)+"\n"+mentions)
 		msg.ParseMode = "MarkdownV2"
 		if _, err := bot.Send(msg); err != nil {
-			LogError("Failed to send tagall message to chat %d: %v", chatID, err)
-		}
-
-	default:
-		msg := tgbotapi.NewMessage(chatID, "Unknown command. Use /help to see available commands.")
-		if _, err := bot.Send(msg); err != nil {
-			LogError("Failed to send unknown command message to chat %d: %v", chatID, err)
+			LogError("Failed to send all message to chat %d: %v", chatID, err)
 		}
 	}
 }

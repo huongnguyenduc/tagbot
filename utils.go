@@ -63,29 +63,29 @@ func getMentions(chatID int64) string {
 
 func startText() string {
 	return "🌕 *Awooo! I am the Alpha Wolf of @werewolf_u2u_bot!*\n\n" +
-		"As the Alpha of this pack, I'll help gather all the wolves for our nightly hunts\\. Here's how to summon the pack:\n\n" +
+		"As the Alpha of this pack, I'll help gather all the wolves for our nightly hunts. Here's how to summon the pack:\n\n" +
 		"*Pack Commands:*\n" +
-		"• /start \\- Hear the Alpha's howl\n" +
-		"• /help \\- Learn the ways of the pack\n" +
-		"• /tagall \\- Summon all wolves to the hunt\n\n" +
+		"• /start - Hear the Alpha's howl\n" +
+		"• /help - Learn the ways of the pack\n" +
+		"• /all - Summon all wolves to the hunt\n\n" +
 		"*Pack Features:*\n" +
 		"• Type `@all` in any message to call the pack\n" +
 		"• I track all wolves in our territory\n" +
 		"• Wolves who leave are removed from the pack\n\n" +
-		"*Note:* To summon the pack, I need to be an Alpha in the group\\. Grant me the necessary permissions to lead the hunt\\.\n\n"
+		"*Note:* To summon the pack, I need to be an Alpha in the group. Grant me the necessary permissions to lead the hunt.\n\n"
 }
 
 func helpText() string {
 	return "🌕 *Pack Commands Guide*\n\n" +
 		"*How to Summon the Pack:*\n" +
-		"• Use /tagall to call all wolves to the hunt\n" +
+		"• Use /all to call all wolves to the hunt\n" +
 		"• Type @all in any message to gather the pack\n\n" +
 		"*Alpha's Notes:*\n" +
 		"• I track all wolves in our territory\n" +
 		"• Wolves who leave are removed from the pack\n" +
 		"• I need to be an Alpha to summon the pack\n\n" +
 		"*Need Help?*\n" +
-		"Use /start to hear the Alpha's howl again\\.\n\n"
+		"Use /start to hear the Alpha's howl again.\n\n"
 }
 
 // Detect @sendto <chat_id> <message> pattern & return the chat_id and message

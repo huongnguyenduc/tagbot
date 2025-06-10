@@ -32,7 +32,7 @@ func main() {
 	commands := []tgbotapi.BotCommand{
 		{Command: "start", Description: "Show welcome message"},
 		{Command: "help", Description: "Show help message"},
-		{Command: "tagall", Description: "Mention all members"},
+		{Command: "all", Description: "Mention all members"},
 	}
 	_, err = bot.Request(tgbotapi.NewSetMyCommands(commands...))
 	if err != nil {

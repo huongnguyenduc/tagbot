@@ -6,13 +6,13 @@ A Telegram bot for managing daily attendance polls for Werewolf game groups.
 
 ✅ **User Management**
 - Automatic user registration on messages
-- Member mentions with `@all` or `/tagall`
+- Member mentions with `@all` or `/all`
 - User cleanup on leave/kick
 
 ## Commands
 
 - `/help` - Show help message
-- `/tagall` - Mention all members
+- `/all` - Mention all members
 
 ## Project Structure
 
