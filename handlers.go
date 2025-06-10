@@ -15,7 +15,7 @@ func handleCommands(update tgbotapi.Update) {
 	switch cmd {
 	case "start":
 		msg := tgbotapi.NewMessage(chatID, startText())
-		msg.ParseMode = "MarkdownV2"
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			LogError("Failed to send start message to chat %d: %v", chatID, err)
 		}

@@ -72,14 +72,7 @@ func startText() string {
 		"• Type `@all` in any message to call the pack\n" +
 		"• I track all wolves in our territory\n" +
 		"• Wolves who leave are removed from the pack\n\n" +
-		"*Note:* To summon the pack, I need to be an Alpha in the group\\. Grant me the necessary permissions to lead the hunt\\.\n\n" +
-		"*Pack Creator:*\n" +
-		"⚡ I was created by the mighty Alpha @duchuongnguyen ⚡\n\n" +
-		"*Support the Pack:*\n" +
-		"Feel free to howl at my creator @duchuongnguyen for:\n" +
-		"• New features for the pack\n" +
-		"• Updates and improvements\n" +
-		"• Supporting the pack's growth"
+		"*Note:* To summon the pack, I need to be an Alpha in the group\\. Grant me the necessary permissions to lead the hunt\\.\n\n"
 }
 
 func helpText() string {
@@ -92,14 +85,7 @@ func helpText() string {
 		"• Wolves who leave are removed from the pack\n" +
 		"• I need to be an Alpha to summon the pack\n\n" +
 		"*Need Help?*\n" +
-		"Use /start to hear the Alpha's howl again\\.\n\n" +
-		"*Pack Creator:*\n" +
-		"⚡ I was created by the mighty Alpha @duchuongnguyen ⚡\n\n" +
-		"*Support the Pack:*\n" +
-		"Feel free to howl at my creator @duchuongnguyen for:\n" +
-		"• New features for the pack\n" +
-		"• Updates and improvements\n" +
-		"• Supporting the pack's growth"
+		"Use /start to hear the Alpha's howl again\\.\n\n"
 }
 
 // Detect @sendto <chat_id> <message> pattern & return the chat_id and message
