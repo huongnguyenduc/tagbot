@@ -115,7 +115,7 @@ func detectSendToMessage(text string) (int64, string) {
 			}
 
 			// Get message by removing @sendto and chatID
-			message := text[strings.Index(text, " ")+1:]
+			message := text[len(parts[0])+len(parts[1])+2:] // +2 for space and @sendto
 			return chatID, message
 		}
 	}
