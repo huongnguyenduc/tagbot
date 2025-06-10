@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -15,13 +14,14 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	// Only accept POST requests
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		LogError("Received non-POST request: %s", r.Method)
 		return
 	}
 
 	// Parse the update from the request body
 	var update tgbotapi.Update
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
-		log.Printf("Failed to decode webhook update: %v", err)
+		LogError("Failed to decode webhook update: %v", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
@@ -64,7 +64,7 @@ func processUpdate(update tgbotapi.Update) {
 
 // setupWebhook configures the webhook with Telegram
 func setupWebhook(webhookURL string) error {
-	log.Printf("Setting up webhook at: %s", webhookURL)
+	LogInfo("Setting up webhook at: %s", webhookURL)
 
 	webhook, err := tgbotapi.NewWebhook(webhookURL)
 	if err != nil {
@@ -76,20 +76,20 @@ func setupWebhook(webhookURL string) error {
 		return fmt.Errorf("failed to set webhook: %w", err)
 	}
 
-	log.Println("Webhook set successfully")
+	LogInfo("Webhook set successfully")
 	return nil
 }
 
 // removeWebhook removes the webhook (useful for switching back to polling)
 func removeWebhook() error {
-	log.Println("Removing webhook...")
+	LogInfo("Removing webhook...")
 
 	_, err := bot.Request(tgbotapi.DeleteWebhookConfig{})
 	if err != nil {
 		return fmt.Errorf("failed to remove webhook: %w", err)
 	}
 
-	log.Println("Webhook removed successfully")
+	LogInfo("Webhook removed successfully")
 	return nil
 }
 
@@ -97,7 +97,7 @@ func removeWebhook() error {
 func startWebhookServer() {
 	webhookURL := os.Getenv("WEBHOOK_URL")
 	if webhookURL == "" {
-		log.Fatal("WEBHOOK_URL environment variable is required for webhook mode")
+		LogFatal("WEBHOOK_URL environment variable is required for webhook mode")
 	}
 
 	port := os.Getenv("PORT")
@@ -107,7 +107,7 @@ func startWebhookServer() {
 
 	// Set up the webhook with Telegram
 	if err := setupWebhook(webhookURL); err != nil {
-		log.Fatal("Failed to setup webhook:", err)
+		LogFatal("Failed to setup webhook: %v", err)
 	}
 
 	// Set up HTTP server
@@ -119,10 +119,10 @@ func startWebhookServer() {
 		w.Write([]byte("OK"))
 	})
 
-	log.Printf("Starting webhook server on port %s", port)
-	log.Printf("Webhook endpoint: /webhook")
+	LogInfo("Starting webhook server on port %s", port)
+	LogInfo("Webhook endpoint: /webhook")
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal("Failed to start webhook server:", err)
+		LogFatal("Failed to start webhook server: %v", err)
 	}
 }

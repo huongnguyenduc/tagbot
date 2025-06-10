@@ -8,20 +8,23 @@ import (
 )
 
 func main() {
-	var err error
+	// Initialize logger
+	initLogger()
+	LogInfo("Starting TagBot...")
 
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	if botToken == "" {
-		log.Fatal("Missing TELEGRAM_BOT_TOKEN environment variable")
+		LogFatal("Missing TELEGRAM_BOT_TOKEN environment variable")
 	}
 
+	var err error
 	bot, err = tgbotapi.NewBotAPI(botToken)
 	if err != nil {
-		log.Fatal("Failed to create bot:", err)
+		LogFatal("Failed to create bot: %v", err)
 	}
 
 	bot.Debug = false
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	LogInfo("Authorized on account %s", bot.Self.UserName)
 
 	initDB()
 
@@ -33,16 +36,16 @@ func main() {
 	}
 	_, err = bot.Request(tgbotapi.NewSetMyCommands(commands...))
 	if err != nil {
-		log.Println("Failed to set bot commands:", err)
+		LogError("Failed to set bot commands: %v", err)
 	}
 
 	// Check if webhook mode is enabled
 	useWebhook := os.Getenv("USE_WEBHOOK")
 	if useWebhook == "true" || useWebhook == "1" {
-		log.Println("Starting in webhook mode...")
+		LogInfo("Starting in webhook mode...")
 		startWebhookServer()
 	} else {
-		log.Println("Starting in polling mode...")
+		LogInfo("Starting in polling mode...")
 		startPolling()
 	}
 }

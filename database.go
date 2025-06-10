@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -13,18 +12,18 @@ import (
 func initDB() {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		log.Fatal("Missing DATABASE_URL environment variable")
+		LogFatal("Missing DATABASE_URL environment variable")
 	}
 
 	var err error
 	db, err = sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatal("Failed to open DB:", err)
+		LogFatal("Failed to open DB: %v", err)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("Failed to ping DB:", err)
+		LogFatal("Failed to ping DB: %v", err)
 	}
 
 	// Create tables if not exist
@@ -39,8 +38,9 @@ func initDB() {
 	);
 	`
 	if _, err := db.Exec(schema); err != nil {
-		log.Fatal("Failed to create tables:", err)
+		LogFatal("Failed to create tables: %v", err)
 	}
+	LogInfo("Database initialized successfully")
 }
 
 func saveUser(chatID int64, user *tgbotapi.User) {
@@ -53,7 +53,9 @@ func saveUser(chatID int64, user *tgbotapi.User) {
 		username = EXCLUDED.username;
 	`
 	if _, err := db.Exec(query, chatID, user.ID, user.FirstName, user.LastName, user.UserName); err != nil {
-		log.Println("Insert user failed:", err)
+		LogError("Failed to save user %d in chat %d: %v", user.ID, chatID, err)
+	} else {
+		LogInfo("Saved user %d in chat %d", user.ID, chatID)
 	}
 }
 
@@ -61,5 +63,6 @@ func deleteUser(chatID int64, userID int64) error {
 	if _, err := db.Exec("DELETE FROM members WHERE chat_id = $1 AND user_id = $2", chatID, userID); err != nil {
 		return fmt.Errorf("delete user failed: %w", err)
 	}
+	LogInfo("Deleted user %d from chat %d", userID, chatID)
 	return nil
 }

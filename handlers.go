@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -11,16 +10,22 @@ func handleCommands(update tgbotapi.Update) {
 	chatID := update.Message.Chat.ID
 	cmd := update.Message.Command()
 
+	LogInfo("Received command %s from chat %d", cmd, chatID)
+
 	switch cmd {
 	case "start":
 		msg := tgbotapi.NewMessage(chatID, startText())
-		msg.ParseMode = "Markdown"
-		bot.Send(msg)
+		msg.ParseMode = "MarkdownV2"
+		if _, err := bot.Send(msg); err != nil {
+			LogError("Failed to send start message to chat %d: %v", chatID, err)
+		}
 
 	case "help":
 		msg := tgbotapi.NewMessage(chatID, helpText())
 		msg.ParseMode = "Markdown"
-		bot.Send(msg)
+		if _, err := bot.Send(msg); err != nil {
+			LogError("Failed to send help message to chat %d: %v", chatID, err)
+		}
 
 	case "tagall":
 		mentions := getMentions(chatID)
@@ -29,10 +34,15 @@ func handleCommands(update tgbotapi.Update) {
 		}
 		msg := tgbotapi.NewMessage(chatID, mentions)
 		msg.ParseMode = "MarkdownV2"
-		bot.Send(msg)
+		if _, err := bot.Send(msg); err != nil {
+			LogError("Failed to send tagall message to chat %d: %v", chatID, err)
+		}
 
 	default:
-		bot.Send(tgbotapi.NewMessage(chatID, "Unknown command. Use /help to see available commands."))
+		msg := tgbotapi.NewMessage(chatID, "Unknown command. Use /help to see available commands.")
+		if _, err := bot.Send(msg); err != nil {
+			LogError("Failed to send unknown command message to chat %d: %v", chatID, err)
+		}
 	}
 }
 
@@ -46,6 +56,7 @@ func handleAtAllMention(update tgbotapi.Update) {
 	text := update.Message.Text
 
 	if strings.Contains(strings.ToLower(text), "@all") {
+		LogInfo("Received @all mention in chat %d from user %d", chatID, update.Message.From.ID)
 		mentions := getMentions(chatID)
 		if mentions == "" {
 			mentions = "No members found to mention."
@@ -53,7 +64,9 @@ func handleAtAllMention(update tgbotapi.Update) {
 		msgText := text + "\n" + mentions
 		msg := tgbotapi.NewMessage(chatID, msgText)
 		msg.ParseMode = "MarkdownV2"
-		bot.Send(msg)
+		if _, err := bot.Send(msg); err != nil {
+			LogError("Failed to send @all mention message to chat %d: %v", chatID, err)
+		}
 	}
 }
 
@@ -62,13 +75,13 @@ func handleChatMemberUpdate(chatMember *tgbotapi.ChatMemberUpdated) {
 	userID := chatMember.From.ID
 	newStatus := chatMember.NewChatMember.Status
 
-	log.Printf("User %d changed status to %s in chat %d", userID, newStatus, chatID)
+	LogInfo("User %d changed status to %s in chat %d", userID, newStatus, chatID)
 
 	switch newStatus {
 	case "left", "kicked":
 		err := deleteUser(chatID, userID)
 		if err != nil {
-			log.Printf("Failed to delete user %d from chat %d: %v", userID, chatID, err)
+			LogError("Failed to delete user %d from chat %d: %v", userID, chatID, err)
 		}
 	}
 }
