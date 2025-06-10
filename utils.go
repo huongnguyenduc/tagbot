@@ -113,7 +113,9 @@ func detectSendToMessage(text string) (int64, string) {
 				log.Printf("Invalid chatID: %s, error: %v", chatIDStr, err)
 				return 0, ""
 			}
-			message := strings.Join(parts[2:], " ")
+
+			// Get message by removing @sendto and chatID
+			message := text[strings.Index(text, " ")+1:]
 			return chatID, message
 		}
 	}

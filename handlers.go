@@ -91,9 +91,11 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 	case update.Message.Text != "":
 		chatID, message := detectSendToMessage(update.Message.Text)
 		if chatID != 0 && message != "" {
-			msg := tgbotapi.NewMessage(chatID, message)
+			msg := tgbotapi.NewMessage(chatID, escapeMarkdownV2(message))
 			msg.ParseMode = "MarkdownV2"
-			bot.Send(msg)
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to send message to chat %d: %v", chatID, err)
+			}
 		}
 	case update.Message.Photo != nil && update.Message.Caption != "":
 		chatID, message := detectSendToMessage(update.Message.Caption)
@@ -101,10 +103,12 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 			photo := update.Message.Photo[len(update.Message.Photo)-1] // get highest resolution
 			msg := tgbotapi.NewPhoto(chatID, tgbotapi.FileID(photo.FileID))
 			if message != "" {
-				msg.Caption = message
+				msg.Caption = escapeMarkdownV2(message)
 				msg.ParseMode = "MarkdownV2"
 			}
-			bot.Send(msg)
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to send message to chat %d: %v", chatID, err)
+			}
 		}
 	}
 }
