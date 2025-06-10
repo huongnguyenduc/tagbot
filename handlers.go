@@ -61,7 +61,7 @@ func handleAtAllMention(update tgbotapi.Update) {
 		if mentions == "" {
 			mentions = "No members found to mention."
 		}
-		msgText := text + "\n" + mentions
+		msgText := escapeMarkdownV2(text) + "\n" + mentions
 		msg := tgbotapi.NewMessage(chatID, msgText)
 		msg.ParseMode = "MarkdownV2"
 		if _, err := bot.Send(msg); err != nil {
