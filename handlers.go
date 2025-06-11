@@ -127,7 +127,7 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 			}
 		}
 	// Handle poll messages
-	case update.Message.Poll != nil:
+	case update.Message.Poll != nil && !update.Message.Poll.IsClosed && update.Message.Poll.Question != "":
 		chatID, question := detectSendToMessage(update.Message.Poll.Question)
 		if chatID != 0 && question != "" {
 			options := make([]string, len(update.Message.Poll.Options))
