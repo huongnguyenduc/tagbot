@@ -135,6 +135,10 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 				options[i] = opt.Text
 			}
 			msg := tgbotapi.NewPoll(chatID, question, options...)
+			msg.IsAnonymous = update.Message.Poll.IsAnonymous
+			msg.AllowsMultipleAnswers = update.Message.Poll.AllowsMultipleAnswers
+			msg.Type = update.Message.Poll.Type
+			msg.Explanation = update.Message.Poll.Explanation
 			if _, err := bot.Send(msg); err != nil {
 				LogError("Failed to send poll to chat %d: %v", chatID, err)
 			}
