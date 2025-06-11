@@ -86,8 +86,10 @@ func handleChatMemberUpdate(chatMember *tgbotapi.ChatMemberUpdated) {
 	}
 }
 
+// Hidden command to send message to chat group by @sendto <chat_id> <message>
 func handleSendMessageToChatGroup(update tgbotapi.Update) {
 	switch {
+	// Handle text messages
 	case update.Message.Text != "":
 		chatID, message := detectSendToMessage(update.Message.Text)
 		if chatID != 0 && message != "" {
@@ -97,6 +99,7 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 				LogError("Failed to send message to chat %d: %v", chatID, err)
 			}
 		}
+	// Handle photo messages
 	case update.Message.Photo != nil && update.Message.Caption != "":
 		chatID, message := detectSendToMessage(update.Message.Caption)
 		if chatID != 0 {
@@ -110,6 +113,7 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 				LogError("Failed to send message to chat %d: %v", chatID, err)
 			}
 		}
+	// Handle document messages
 	case update.Message.Document != nil && update.Message.Caption != "":
 		chatID, message := detectSendToMessage(update.Message.Caption)
 		if chatID != 0 {
@@ -120,6 +124,19 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 			}
 			if _, err := bot.Send(msg); err != nil {
 				LogError("Failed to send document to chat %d: %v", chatID, err)
+			}
+		}
+	// Handle poll messages
+	case update.Message.Poll != nil:
+		chatID, question := detectSendToMessage(update.Message.Poll.Question)
+		if chatID != 0 && question != "" {
+			options := make([]string, len(update.Message.Poll.Options))
+			for i, opt := range update.Message.Poll.Options {
+				options[i] = opt.Text
+			}
+			msg := tgbotapi.NewPoll(chatID, question, options...)
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to send poll to chat %d: %v", chatID, err)
 			}
 		}
 	}
