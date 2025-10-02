@@ -7,6 +7,7 @@ import (
 )
 
 var (
-	db  *sql.DB
-	bot *tgbotapi.BotAPI
+	db             *sql.DB
+	bot            *tgbotapi.BotAPI
+	specialChatIDs []int64
 )

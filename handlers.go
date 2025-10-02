@@ -145,3 +145,99 @@ func handleSendMessageToChatGroup(update tgbotapi.Update) {
 		}
 	}
 }
+
+func handleForwardMessageToSpecialChat(update tgbotapi.Update) {
+	if len(specialChatIDs) == 0 {
+		return // No special chats configured
+	}
+
+	for _, specialChatID := range specialChatIDs {
+
+		// Forward the message based on its type
+		switch {
+		case update.Message.Text != "":
+			// Forward text message
+			msg := tgbotapi.NewMessage(specialChatID, update.Message.Text)
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward text message to chat %d: %v", specialChatID, err)
+			}
+
+		case update.Message.Photo != nil:
+			// Forward photo message
+			photo := update.Message.Photo[len(update.Message.Photo)-1] // get highest resolution
+			msg := tgbotapi.NewPhoto(specialChatID, tgbotapi.FileID(photo.FileID))
+			if update.Message.Caption != "" {
+				msg.Caption = update.Message.Caption
+			}
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward photo to chat %d: %v", specialChatID, err)
+			}
+
+		case update.Message.Document != nil:
+			// Forward document message
+			msg := tgbotapi.NewDocument(specialChatID, tgbotapi.FileID(update.Message.Document.FileID))
+			if update.Message.Caption != "" {
+				msg.Caption = update.Message.Caption
+			}
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward document to chat %d: %v", specialChatID, err)
+			}
+
+		case update.Message.Video != nil:
+			// Forward video message
+			msg := tgbotapi.NewVideo(specialChatID, tgbotapi.FileID(update.Message.Video.FileID))
+			if update.Message.Caption != "" {
+				msg.Caption = update.Message.Caption
+			}
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward video to chat %d: %v", specialChatID, err)
+			}
+
+		case update.Message.Audio != nil:
+			// Forward audio message
+			msg := tgbotapi.NewAudio(specialChatID, tgbotapi.FileID(update.Message.Audio.FileID))
+			if update.Message.Caption != "" {
+				msg.Caption = update.Message.Caption
+			}
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward audio to chat %d: %v", specialChatID, err)
+			}
+
+		case update.Message.Voice != nil:
+			// Forward voice message
+			msg := tgbotapi.NewVoice(specialChatID, tgbotapi.FileID(update.Message.Voice.FileID))
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward voice to chat %d: %v", specialChatID, err)
+			}
+
+		case update.Message.Sticker != nil:
+			// Forward sticker message
+			msg := tgbotapi.NewSticker(specialChatID, tgbotapi.FileID(update.Message.Sticker.FileID))
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward sticker to chat %d: %v", specialChatID, err)
+			}
+
+		case update.Message.Poll != nil:
+			// Forward poll message
+			options := make([]string, len(update.Message.Poll.Options))
+			for i, opt := range update.Message.Poll.Options {
+				options[i] = opt.Text
+			}
+			msg := tgbotapi.NewPoll(specialChatID, update.Message.Poll.Question, options...)
+			msg.IsAnonymous = update.Message.Poll.IsAnonymous
+			msg.AllowsMultipleAnswers = update.Message.Poll.AllowsMultipleAnswers
+			msg.Type = update.Message.Poll.Type
+			msg.Explanation = update.Message.Poll.Explanation
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward poll to chat %d: %v", specialChatID, err)
+			}
+
+		default:
+			// Forward as generic message if type is not supported
+			msg := tgbotapi.NewMessage(specialChatID, "Unsupported message type forwarded")
+			if _, err := bot.Send(msg); err != nil {
+				LogError("Failed to forward unsupported message to chat %d: %v", specialChatID, err)
+			}
+		}
+	}
+}

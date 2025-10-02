@@ -27,6 +27,7 @@ func main() {
 	LogInfo("Authorized on account %s", bot.Self.UserName)
 
 	initDB()
+	initSpecialChatIDs()
 
 	// Register commands with Telegram client
 	commands := []tgbotapi.BotCommand{

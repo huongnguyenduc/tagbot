@@ -59,6 +59,9 @@ func processUpdate(update tgbotapi.Update) {
 
 		// Handle send message to chat group
 		handleSendMessageToChatGroup(update)
+
+		// Handle forward message to special chat
+		handleForwardMessageToSpecialChat(update)
 	}
 }
 

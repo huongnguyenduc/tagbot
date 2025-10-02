@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -106,4 +107,33 @@ func detectSendToMessage(text string) (int64, string) {
 		}
 	}
 	return 0, ""
+}
+
+// initSpecialChatIDs initializes the special chat IDs from environment variable
+func initSpecialChatIDs() {
+	specialChatIDsStr := os.Getenv("SPECIAL_CHAT_IDS")
+	if specialChatIDsStr == "" {
+		LogInfo("SPECIAL_CHAT_IDS environment variable is not set, no special chats configured")
+		return
+	}
+
+	chatIDStrings := strings.Split(specialChatIDsStr, ",")
+	specialChatIDs = make([]int64, 0, len(chatIDStrings))
+
+	for _, chatIDStr := range chatIDStrings {
+		chatIDStr = strings.TrimSpace(chatIDStr)
+		if chatIDStr == "" {
+			continue
+		}
+
+		var chatID int64
+		if _, err := fmt.Sscanf(chatIDStr, "%d", &chatID); err != nil {
+			LogError("Invalid chat ID format in SPECIAL_CHAT_IDS: %s", chatIDStr)
+			continue
+		}
+
+		specialChatIDs = append(specialChatIDs, chatID)
+	}
+
+	LogInfo("Initialized %d special chat IDs", len(specialChatIDs))
 }
