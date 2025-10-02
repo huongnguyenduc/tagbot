@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -151,7 +152,12 @@ func handleForwardMessageToSpecialChat(update tgbotapi.Update) {
 		return // No special chats configured
 	}
 
+	if strings.HasPrefix(update.Message.Text, "@sendto") {
+		return // Ignore messages with @sendto
+	}
+
 	for _, specialChatID := range specialChatIDs {
+		sendInfoMessage(specialChatID, update)
 
 		// Forward the message based on its type
 		switch {
@@ -239,5 +245,16 @@ func handleForwardMessageToSpecialChat(update tgbotapi.Update) {
 				LogError("Failed to forward unsupported message to chat %d: %v", specialChatID, err)
 			}
 		}
+	}
+}
+
+// Add <ChatID>-<UserID>-<Username> to the message text
+func sendInfoMessage(chatID int64, update tgbotapi.Update) {
+	message := fmt.Sprintf("<%d>-<%s>-<%d>-<@%s>", update.Message.Chat.ID, update.Message.Chat.Title, update.Message.From.ID, update.Message.From.UserName)
+
+	msg := tgbotapi.NewMessage(chatID, escapeMarkdownV2(message))
+	msg.ParseMode = "MarkdownV2"
+	if _, err := bot.Send(msg); err != nil {
+		LogError("Failed to send info message to chat %d: %v", chatID, err)
 	}
 }
