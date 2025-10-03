@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -154,6 +155,15 @@ func handleForwardMessageToSpecialChat(update tgbotapi.Update) {
 
 	if strings.HasPrefix(update.Message.Text, "@sendto") {
 		return // Ignore messages with @sendto
+	}
+
+	if update.Message.From.IsBot {
+		return // Ignore messages from bots
+	}
+
+	// Ignore messages from the special chat ids
+	if slices.Contains(specialChatIDs, update.Message.Chat.ID) {
+		return // Ignore messages from the special chat ids
 	}
 
 	for _, specialChatID := range specialChatIDs {
